@@ -21,10 +21,20 @@ const generateTokens = (userId) => {
 exports.register = async (req, res) => {
   try {
     const { username, name, email, password, role } = req.body;
+    const normalizedUsername = String(username || '').trim().toLowerCase();
+    const normalizedName = String(name || '').trim();
+    const normalizedEmail = String(email || '').trim().toLowerCase();
 
-    if (!username || !name || !email || !password) {
+    if (!normalizedUsername || !normalizedName || !normalizedEmail || !password) {
       return res.status(400).json({
         message: 'Username, name, email, and password are required',
+      });
+    }
+
+    const usernamePattern = /^[a-z0-9](?:[a-z0-9]|-(?=[a-z0-9])){2,38}$/;
+    if (!usernamePattern.test(normalizedUsername)) {
+      return res.status(400).json({
+        message: 'Invalid username format',
       });
     }
 
@@ -34,10 +44,10 @@ exports.register = async (req, res) => {
 
     // Check duplicates
     const existingUser = await User.findOne({
-      $or: [{ email: email.toLowerCase() }, { username: username.toLowerCase() }],
+      $or: [{ email: normalizedEmail }, { username: normalizedUsername }],
     });
     if (existingUser) {
-      if (existingUser.email === email.toLowerCase()) {
+      if (existingUser.email === normalizedEmail) {
         return res.status(409).json({ message: 'Email already registered' });
       }
       return res.status(409).json({ message: 'Username already taken' });
@@ -49,9 +59,9 @@ exports.register = async (req, res) => {
 
     // Create user
     const user = await User.create({
-      username: username.toLowerCase(),
-      name,
-      email: email.toLowerCase(),
+      username: normalizedUsername,
+      name: normalizedName,
+      email: normalizedEmail,
       password: hashedPassword,
       role: userRole,
       emailVerificationToken: crypto.randomBytes(24).toString('hex'),

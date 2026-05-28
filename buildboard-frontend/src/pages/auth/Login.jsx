@@ -31,7 +31,14 @@ const Login = () => {
       await login(data.email, data.password);
       navigate('/');
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to sign in. Please check your credentials.');
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error?.message ||
+        (err.code === 'ERR_NETWORK'
+          ? 'Unable to reach the server. Please check your connection and API URL.'
+          : '') ||
+        'Failed to sign in. Please check your credentials.';
+      setErrorMsg(message);
     }
   };
 

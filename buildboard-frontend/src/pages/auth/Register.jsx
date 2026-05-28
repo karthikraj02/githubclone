@@ -6,9 +6,16 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const registerSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').regex(/^[a-z0-9-]+$/, 'Lowercase letters, numbers, and hyphens only'),
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address'),
+  username: z
+    .string()
+    .trim()
+    .min(3, 'Username must be at least 3 characters')
+    .regex(
+      /^[a-z0-9](?:[a-z0-9]|-(?=[a-z0-9])){2,38}$/,
+      'Use 3-39 lowercase letters/numbers; hyphen cannot end username'
+    ),
+  name: z.string().trim().min(1, 'Name is required'),
+  email: z.string().trim().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['developer', 'reviewer', 'admin']).default('developer'),
 });
@@ -24,6 +31,9 @@ const Register = () => {
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      role: 'developer',
+    },
   });
 
   const onSubmit = async (data) => {
@@ -32,7 +42,14 @@ const Register = () => {
       await registerUser(data);
       navigate('/');
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to register. Please try again.');
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error?.message ||
+        (err.code === 'ERR_NETWORK'
+          ? 'Unable to reach the server. Please check your connection and API URL.'
+          : '') ||
+        'Failed to register. Please try again.';
+      setErrorMsg(message);
     }
   };
 
