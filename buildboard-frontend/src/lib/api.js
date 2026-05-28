@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+const envApiUrl = import.meta.env.VITE_API_URL;
+const fallbackOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5000';
+const defaultBaseUrl = import.meta.env.DEV ? 'http://localhost:5000/api' : `${fallbackOrigin}/api`;
+export const API_BASE_URL = envApiUrl || defaultBaseUrl;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
