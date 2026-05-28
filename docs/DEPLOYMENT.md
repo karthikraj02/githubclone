@@ -29,6 +29,24 @@ CLIENT_URL=https://your-vercel-app.vercel.app
 NODE_ENV=production
 ```
 
+## Backend on Vercel (serverless)
+
+1. Import the repository into Vercel.
+2. Set root directory to `buildboard-backend`.
+3. Framework preset: Other.
+4. Ensure `vercel.json` is included (routes all traffic to `index.js`).
+5. Add environment variables:
+
+```env
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/<database>
+JWT_SECRET=<long-random-secret>
+JWT_REFRESH_SECRET=<another-long-random-secret>
+CLIENT_URL=https://your-frontend.vercel.app
+NODE_ENV=production
+```
+
+Note: Socket.io features require a long-lived server and are not supported on Vercel serverless.
+
 ## MongoDB Atlas
 
 1. Create an Atlas cluster.
@@ -77,4 +95,3 @@ jobs:
       - run: npm ci
       - run: node --check server.js
 ```
-
