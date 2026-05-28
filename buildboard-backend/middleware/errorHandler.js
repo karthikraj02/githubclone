@@ -34,6 +34,7 @@ const errorHandler = (err, req, res, next) => {
   // Ensure we always send a valid JSON response
   res.status(status).json({
     success: false,
+    message,
     error: {
       message,
       status,
